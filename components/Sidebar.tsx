@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Icon from './Icon';
 
@@ -20,7 +19,14 @@ const navItems = [
   { id: 'reporting', label: 'Reporting', icon: 'file-invoice' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, isExpanded, onHoverChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  onTabChange,
+  onLogout,
+  isExpanded,
+  onHoverChange,
+}) => {
+
   const NavLink: React.FC<{ item: typeof navItems[0] }> = ({ item }) => (
     <li className="relative group mb-3">
       <a
@@ -60,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, isE
         isExpanded ? 'w-64 shadow-2xl' : 'w-20 shadow-lg'
       }`}
     >
-      {/* Header */}
+      {/* HEADER */}
       <div
         className={`py-5 border-b border-light-border dark:border-dark-border transition-all duration-500 ${
           isExpanded ? 'px-6' : 'px-0'
@@ -73,49 +79,105 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onLogout, isE
           style={{ textShadow: '0 0 15px var(--color-primary-glow)' }}
         >
           <Icon name="chart-line" />
-          {isExpanded && <span>Sentilytics</span>}
+          {isExpanded && <span>SENTILYTICS</span>}
         </h2>
       </div>
 
-      {/* Navigation */}
+      {/* NAVIGATION */}
       <ul className="flex-grow pt-4 px-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-brand-primary/30 scrollbar-track-transparent">
         {navItems.map((item) => (
           <NavLink key={item.id} item={item} />
         ))}
       </ul>
 
-      {/* Footer */}
-      <div className={`border-t border-light-border dark:border-dark-border p-4 flex flex-col items-center space-y-4`}>
+      {/* =========================== */}
+      {/* 🔥 ANIMATED CYBER FOOTER   */}
+      {/* =========================== */}
+
+      <div
+        className={`relative border-t border-light-border dark:border-dark-border p-6 flex flex-col items-center space-y-4 overflow-visible`}
+      >
+        {/* LOCAL CSS FOR FOOTER ANIMATIONS */}
+        <style>{`
+          @keyframes footerFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+          }
+          .footer-float {
+            animation: footerFloat 3s ease-in-out infinite;
+          }
+
+          .footer-icon:hover {
+            text-shadow:
+              0 0 8px rgba(255,0,255,0.9),
+              0 0 18px rgba(255,0,255,0.6),
+              0 0 32px rgba(255,0,255,0.35),
+              0 0 60px rgba(255,0,255,0.2);
+          }
+
+          .footer-spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            background: rgba(255,0,255,0.9);
+            box-shadow: 0 0 14px rgba(255,0,255,0.9);
+            animation: sparkFlash 1.4s ease-out infinite;
+          }
+
+          @keyframes sparkFlash {
+            0% { opacity: 0; transform: scale(0.4) translateY(0px); }
+            30% { opacity: 0.85; transform: scale(1) translateY(-6px); }
+            100% { opacity: 0; transform: scale(0.4) translateY(-14px); }
+          }
+
+          .spark-1 { left: 45%; top: 18%; animation-delay: 0s; }
+          .spark-2 { left: 58%; top: 26%; animation-delay: 0.4s; }
+          .spark-3 { left: 50%; top: 12%; animation-delay: 1s; }
+        `}</style>
+
+        {/* SPARK PARTICLES */}
+        <div className="footer-spark spark-1"></div>
+        <div className="footer-spark spark-2"></div>
+        <div className="footer-spark spark-3"></div>
+
+        {/* Built By */}
         {isExpanded && (
           <div className="text-center text-xs text-light-text-secondary dark:text-dark-text-secondary font-light tracking-wide animate-fade-in">
             Built by <span className="text-brand-primary font-medium">Kushwanth</span>
           </div>
         )}
 
-        {/* Social Icons */}
-        <div className="flex justify-center gap-6">
+        {/* SOCIAL ICONS */}
+        <div className="flex justify-center gap-7 mt-2 relative">
+          {/* LINKEDIN */}
           <a
             href="https://www.linkedin.com/in/kushichowdary/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transform hover:scale-110 transition-all duration-500"
+            className="footer-float footer-icon text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
           >
-            <Icon type="brands" name="linkedin" className="text-lg" />
+            <Icon type="brands" name="linkedin" className="text-xl" />
           </a>
+
+          {/* GITHUB */}
           <a
             href="https://github.com/kushichowdary"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transform hover:scale-110 transition-all duration-500"
+            className="footer-float footer-icon text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transition-all duration-500 hover:scale-125 hover:-translate-y-1"
           >
-            <Icon type="brands" name="github" className="text-lg" />
+            <Icon type="brands" name="github" className="text-xl" />
           </a>
         </div>
 
-        {/* Logout */}
+        {/* LOGOUT BUTTON */}
         <button
           onClick={onLogout}
-          className={`w-full flex items-center justify-center text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transition-all duration-500 hover:shadow-glow-primary bg-black/5 dark:bg-white/5 px-4 py-2.5 rounded-lg ${
+          className={`w-full mt-3 flex items-center justify-center text-light-text-secondary dark:text-dark-text-secondary hover:text-brand-primary transition-all duration-500 hover:shadow-glow-primary bg-black/5 dark:bg-white/5 px-4 py-2.5 rounded-lg ${
             isExpanded ? 'justify-start' : ''
           }`}
         >

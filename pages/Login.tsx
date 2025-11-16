@@ -198,7 +198,7 @@ const Login: React.FC<LoginProps> = ({ addAlert }) => {
         <div className="text-center mb-8">
           <ScrambledText 
             className="!m-0 !max-w-full !font-sans !text-4xl !font-bold text-center justify-center"
-            radius={150}
+            radius={30}
           >
             SENTILYTICS
           </ScrambledText>

@@ -1,64 +1,49 @@
 import React from 'react';
 import MagicBento from '../components/MagicBento';
 import ScrambledText from '../components/ScrambledText';
+import { AccentColor } from '../types';
 
 interface DashboardProps {
     onTabChange: (tabId: string) => void;
+    accentColor: AccentColor | null;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onTabChange }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onTabChange, accentColor }) => {
+  const titleStyle: React.CSSProperties = {
+    color: accentColor ? accentColor.main : 'var(--color-primary)',
+    textShadow: `0 0 25px ${accentColor ? accentColor.glow : 'var(--color-primary-glow)'}`
+  };
+
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start py-10 px-4">
+    <div className="w-full min-h-full flex flex-col items-center justify-center gap-12 p-4 animate-dashboard-float">
 
-      {/* Pulsing Neon Magenta Text Glow */}
+      {/* FLOAT ANIMATION */}
       <style>
-      {`
-        @keyframes pulseGlow {
-          0% {
-            text-shadow:
-              0 0 6px rgba(255,0,255,0.85),
-              0 0 14px rgba(255,0,255,0.7),
-              0 0 28px rgba(255,0,255,0.4);
+        {`
+          @keyframes dashboardFloat {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
           }
-          50% {
-            text-shadow:
-              0 0 10px rgba(255,0,255,1),
-              0 0 22px rgba(255,0,255,0.9),
-              0 0 40px rgba(255,0,255,0.6),
-              0 0 80px rgba(255,0,255,0.4);
-          }
-          100% {
-            text-shadow:
-              0 0 6px rgba(255,0,255,0.85),
-              0 0 14px rgba(255,0,255,0.7),
-              0 0 28px rgba(255,0,255,0.4);
-          }
-        }
 
-        .pulse-text {
-          color: #ff00ff;
-          animation: pulseGlow 2.4s ease-in-out infinite;
-        }
-      `}
+          .animate-dashboard-float {
+            animation: dashboardFloat 4.5s ease-in-out infinite;
+          }
+        `}
       </style>
 
-      {/* Pulse Glow Title */}
-      <div className="mb-6">
-        <ScrambledText
-          className="pulse-text !m-0 !max-w-full !font-sans !text-4xl !font-bold text-center justify-center"
-          radius={150}
-        >
-          DASHBOARD
-        </ScrambledText>
-      </div>
+      {/* Title */}
+      <ScrambledText 
+        className="!text-5xl md:!text-5xl !font-bold text-center !m-0"
+        style={titleStyle}
+        radius={50}
+        scrambleChars="*<>/"
+      >
+        DASHBOARD
+      </ScrambledText>
 
-      {/* Subtitle */}
-      <p className="text-white/60 mb-10">
-        Choose a tool below to begin analysis
-      </p>
-
-      {/* Magic Bento Component */}
-      <MagicBento
+      {/* Bento Grid */}
+      <MagicBento 
         onTabChange={onTabChange}
         enableStars={true}
         enableSpotlight={true}

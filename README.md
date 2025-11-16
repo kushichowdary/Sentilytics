@@ -1,8 +1,9 @@
-# 🛒 Sentilytics — Data-Driven Sentiment Analysis for E-Commerce  
+# 🛒 Sentilytics
+Data-Driven Sentiment Analysis for E-Commerce  
 
-<img width="1237" height="558" alt="Image" src="https://github.com/user-attachments/assets/1e618e5e-9ff4-47ae-bdb2-119a87afea75" />
+<img width="1882" height="972" alt="Image" src="https://github.com/user-attachments/assets/1dfd0e5c-44a1-44ac-aa44-c1f8db03dd96" />
 
-A modern AI-powered web platform that analyzes customer sentiment, product reviews, and competitive insights using machine learning, natural language processing, and real-time data processing.
+A modern web platform that analyzes customer sentiment, product reviews, and competitive insights using machine learning, natural language processing, and real-time data processing.
 
 Sentilytics provides multiple tools to evaluate product performance, extract consumer sentiment, compare competitors, and generate actionable analytics for e-commerce businesses.
 

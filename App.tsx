@@ -1,6 +1,6 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
-import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth';
+// FIX: Import firebase compat library to get User type and auth methods.
+import firebase from 'firebase/compat/app';
 import { auth } from './firebase';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -19,7 +19,8 @@ import { AlertMessage, Theme, AccentColor } from './types';
 import Loader from './components/Loader';
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  // FIX: Use firebase.auth.User for user state type.
+  const [user, setUser] = useState<firebase.auth.User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [alerts, setAlerts] = useState<AlertMessage[]>([]);
@@ -28,7 +29,8 @@ const App: React.FC = () => {
   const [accentColor, setAccentColor] = useState<AccentColor | null>(null);
   
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    // FIX: Use compat syntax for onAuthStateChanged.
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
     });
@@ -111,7 +113,7 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard onTabChange={setActiveTab} />;
+      case 'dashboard': return <Dashboard onTabChange={setActiveTab} accentColor={accentColor} theme={theme} />;
       case 'url-analysis': return <UrlAnalysis addAlert={addAlert} />;
       case 'file-upload': return <FileUpload addAlert={addAlert} />;
       case 'single-review': return <SingleReview addAlert={addAlert} />;
@@ -120,12 +122,13 @@ const App: React.FC = () => {
       case 'reporting': return <Reporting addAlert={addAlert} />;
       case 'settings': return <Settings addAlert={addAlert} />;
       case 'app-settings': return <AppSettings addAlert={addAlert} theme={theme} onToggleTheme={toggleTheme} accentColor={accentColor} setAccentColor={setAccentColor} />;
-      default: return <Dashboard onTabChange={setActiveTab} />;
+      default: return <Dashboard onTabChange={setActiveTab} accentColor={accentColor} theme={theme} />;
     }
   };
   
   const handleLogout = () => {
-    signOut(auth).then(() => {
+    // FIX: Use compat syntax for signOut.
+    auth.signOut().then(() => {
         setActiveTab('dashboard');
         addAlert('You have been logged out.', 'info');
     }).catch((error) => {

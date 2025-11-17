@@ -1,24 +1,26 @@
-
 import React, { useState } from 'react';
 import Icon from '../components/Icon';
 import DotGrid from '../components/DotGrid';
-import { auth } from '../firebase';
+import { auth } from '../firebase'; // <-- must be modular auth from firebase v9+
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  User,
 } from 'firebase/auth';
-import { AlertType } from '../types';
+import { AlertType, AccentColor, Theme } from '../types';
 import ScrambledText from '../components/ScrambledText';
 
 interface LoginProps {
   addAlert: (message: string, type: AlertType) => void;
+  accentColor: AccentColor | null;
+  theme: Theme;
 }
 
-// Firebase error handler
-const getFirebaseErrorMessage = (errorCode: string): string => {
+// Map Firebase error codes to friendly messages
+const getFirebaseErrorMessage = (errorCode?: string, fallback?: string) => {
   switch (errorCode) {
     case 'auth/user-not-found':
     case 'auth/wrong-password':
@@ -30,12 +32,15 @@ const getFirebaseErrorMessage = (errorCode: string): string => {
       return 'Password should be at least 6 characters.';
     case 'auth/invalid-email':
       return 'Please enter a valid email address.';
+    case 'auth/popup-closed-by-user':
+      return 'Sign-in popup was closed before completing.';
+    case 'auth/cancelled-popup-request':
+      return 'Popup request cancelled. Try again.';
     default:
-      return 'An unexpected error occurred. Please try again.';
+      return fallback || 'An unexpected error occurred. Please try again.';
   }
 };
 
-// 🔹 Reusable AuthForm component (moved outside main component to fix typing issue)
 const AuthForm: React.FC<{
   isLoginView: boolean;
   isLoading: boolean;
@@ -101,8 +106,7 @@ const AuthForm: React.FC<{
         disabled={isLoading}
         className="relative w-full py-3 bg-brand-primary text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 
         disabled:bg-slate-600 dark:disabled:bg-slate-700 
-        hover:shadow-glow-primary hover:scale-[1.02] active:scale-[0.98] 
-        before:absolute before:inset-0 before:rounded-lg before:blur-xl before:bg-brand-primary before:opacity-30 before:transition-all before:duration-300 hover:before:opacity-50"
+        hover:shadow-glow-primary hover:scale-[1.02] active:scale-[0.98]"
       >
         {isLoading
           ? isLoginView
@@ -116,14 +120,28 @@ const AuthForm: React.FC<{
   );
 };
 
-const Login: React.FC<LoginProps> = ({ addAlert }) => {
+const Login: React.FC<LoginProps> = ({ addAlert, accentColor, theme }) => {
   const [isLoginView, setIsLoginView] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
 
-  // Handle Email + Password Auth
+  // DotGrid colors from accent
+  const lightActiveColor = accentColor?.main || '#3b82f6';
+  const darkActiveColor = accentColor?.main || '#f038d1';
+
+  // Helper to surface friendly message and console debug
+  const handleError = (err: any) => {
+    // Firebase Error object usually has code + message
+    const code = err?.code;
+    const msg = err?.message || String(err);
+    console.error('Auth error:', { code, msg, raw: err });
+    const friendly = getFirebaseErrorMessage(code, msg);
+    addAlert(friendly, 'error');
+  };
+
+  // Email/password handlers (modular API)
   const handleEmailPasswordAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -131,62 +149,70 @@ const Login: React.FC<LoginProps> = ({ addAlert }) => {
       if (isLoginView) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        if (userCredential.user) {
-          await updateProfile(userCredential.user, { displayName: fullName });
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        // update display name if provided
+        if (userCred.user) {
+          if (fullName && typeof updateProfile === 'function') {
+            // updateProfile accepts (user, {displayName})
+            await updateProfile(userCred.user as User, { displayName: fullName });
+          }
         }
       }
-    } catch (error: any) {
-      addAlert(getFirebaseErrorMessage(error.code), 'error');
+    } catch (err: any) {
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Google Auth
+  // Google sign-in (modular API)
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    const provider = new GoogleAuthProvider();
     try {
+      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-    } catch (error: any) {
-      addAlert(getFirebaseErrorMessage(error.code), 'error');
+    } catch (err: any) {
+      handleError(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // UI Elements
+  const titleStyle: React.CSSProperties = {
+    color: accentColor?.main || 'var(--color-primary)',
+    textShadow: `0 0 30px ${accentColor?.glow || 'var(--color-primary-glow)'}`,
+  };
+
   const OrSeparator = () => (
     <div className="flex items-center my-4">
       <hr className="flex-grow border-light-border dark:border-dark-border" />
-      <span className="mx-4 text-xs text-light-text-secondary dark:text-dark-text-secondary">
-        OR
-      </span>
+      <span className="mx-4 text-xs text-light-text-secondary dark:text-dark-text-secondary">OR</span>
       <hr className="flex-grow border-light-border dark:border-dark-border" />
     </div>
   );
 
   return (
     <div className="min-h-screen bg-light-background dark:bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Dot Grid */}
-      <div className="dark:hidden absolute inset-0 w-full h-full z-0">
+      {/* Light DotGrid */}
+      <div className="absolute inset-0 dark:hidden z-0">
         <DotGrid
           dotSize={3}
           gap={30}
           baseColor="#d1d5db"
-          activeColor="#3b82f6"
+          activeColor={lightActiveColor}
           proximity={120}
           shockStrength={3}
           className="w-full h-full"
         />
       </div>
-      <div className="hidden dark:block absolute inset-0 w-full h-full z-0">
+
+      {/* Dark DotGrid */}
+      <div className="absolute inset-0 hidden dark:block z-0">
         <DotGrid
           dotSize={3}
           gap={30}
           baseColor="#392e4e"
-          activeColor="#f038d1"
+          activeColor={darkActiveColor}
           proximity={120}
           shockStrength={3}
           className="w-full h-full"
@@ -194,25 +220,15 @@ const Login: React.FC<LoginProps> = ({ addAlert }) => {
       </div>
 
       {/* Login Card */}
-      <div className="w-full max-w-md z-10 group">
-        <div className="text-center mb-8">
-          <ScrambledText 
-            className="!m-0 !max-w-full !font-sans !text-4xl !font-bold text-center justify-center"
-            radius={30}
-          >
+      <div className="w-full max-w-sm z-10 group animate-float">
+        <div className="text-center mb-6">
+          <ScrambledText className="!text-4xl !font-bold !m-0 text-center" radius={20} style={titleStyle}>
             SENTILYTICS
           </ScrambledText>
-          <p className="text-light-text-secondary dark:text-gray-400 mt-2">
-            Welcome back
-          </p>
+          <p className="text-light-text-secondary dark:text-gray-400 mt-2">Welcome back</p>
         </div>
 
-        <div className="p-8 border border-light-border dark:border-dark-border rounded-2xl 
-          transition-all duration-300 group-hover:shadow-glow-primary
-          group-hover:bg-light-surface/50 dark:group-hover:bg-black/20 
-          group-hover:backdrop-blur-md bg-light-surface/30 dark:bg-black/30 shadow-inner shadow-black/5">
-          
-          {/* Auth Form */}
+        <div className="p-8 rounded-2xl bg-light-surface/30 dark:bg-black/30 border border-light-border dark:border-dark-border shadow-inner transition-all duration-300 group-hover:backdrop-blur-md group-hover:shadow-glow-primary">
           <AuthForm
             isLoginView={isLoginView}
             isLoading={isLoading}
@@ -227,27 +243,18 @@ const Login: React.FC<LoginProps> = ({ addAlert }) => {
 
           <OrSeparator />
 
-          {/* Google Button */}
           <button
-            type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full py-3 bg-white dark:bg-slate-800 text-light-text dark:text-dark-text font-semibold rounded-lg 
-            hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-all duration-300 
-            flex items-center justify-center gap-3 border border-light-border dark:border-dark-border 
-            hover:shadow-glow-primary"
+            className="w-full py-3 bg-white dark:bg-slate-800 border border-light-border dark:border-dark-border rounded-lg flex items-center justify-center gap-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
           >
             <Icon type="brands" name="google" />
             Sign in with Google
           </button>
 
-          {/* Toggle Text */}
           <p className="text-center text-sm text-light-text-secondary dark:text-gray-400 mt-6">
-            {isLoginView ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={() => setIsLoginView(!isLoginView)}
-              className="font-semibold text-brand-primary hover:underline transition-colors"
-            >
+            {isLoginView ? "Don't have an account? " : "Already have an account? "}
+            <button onClick={() => setIsLoginView(!isLoginView)} className="font-semibold text-brand-primary hover:underline">
               {isLoginView ? 'Sign Up' : 'Login'}
             </button>
           </p>

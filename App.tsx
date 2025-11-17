@@ -19,8 +19,8 @@ import { AlertMessage, Theme, AccentColor } from './types';
 import Loader from './components/Loader';
 
 const App: React.FC = () => {
-  // FIX: Use firebase.auth.User for user state type.
-  const [user, setUser] = useState<firebase.auth.User | null>(null);
+  // FIX: Use firebase.User for user state type.
+  const [user, setUser] = useState<firebase.User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [alerts, setAlerts] = useState<AlertMessage[]>([]);
@@ -149,7 +149,7 @@ const App: React.FC = () => {
     return (
         <>
             <AlertContainer alerts={alerts} onDismiss={dismissAlert} />
-            <Login addAlert={addAlert} />
+            <Login addAlert={addAlert} accentColor={accentColor} theme={theme} />
         </>
     );
   }
